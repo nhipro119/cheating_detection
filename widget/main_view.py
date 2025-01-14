@@ -20,4 +20,17 @@ class mainView(QMainWindow):
         self.setWindowTitle("Cheating Detection")
         size = (1920,1080)
         self.setMinimumSize(*size)
-        self.centralWidget()
+        
+        self.total_widget = QWidget()
+        self.centralWidget(self.total_widget)
+        
+    def create_total_widget(self):
+        name_lb = QLabel(parent=self.total_widget)
+        name_lb.setGeometry(20,20)
+        name_lb.setText("HE THONG HO TRO CANH BAO VI PHAM")
+        
+        
+        self.image_lb = QLabel(parent=self.total_widget)
+        self.image_lb.setGeometry(20,200)
+        
+        
