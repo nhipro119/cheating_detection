@@ -14,6 +14,7 @@ class Face_detector():
         
         mp_drawing = mp.solutions.drawing_utils
         self.drawing_spec = mp_drawing.DrawingSpec(thickness=1, circle_radius=1)
+    def face_detect(self):
         
 cap = cv2.VideoCapture(0)
 while cap.isOpened():
