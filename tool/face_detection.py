@@ -2,7 +2,7 @@ import cv2
 import mediapipe as mp
 import numpy as np
 import time
-
+from yolov5.detect import yolo
 
 
 
@@ -14,9 +14,10 @@ class Face_detector():
         
         mp_drawing = mp.solutions.drawing_utils
         self.drawing_spec = mp_drawing.DrawingSpec(thickness=1, circle_radius=1)
+        self.yolo = yolo(weights="yolov5/best.pt")
     def face_detect(self, image):
         image = cv2.cvtColor(cv2.flip(image,1), cv2.COLOR_BGR2RGB)
-    
+        img2 = image.copy()
         image.flags.writeable = False
 
         result = self.face_mesh.process(image)
@@ -29,13 +30,27 @@ class Face_detector():
 
         face_3d = []
         face_2d = []
+        
+        gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        face_classifier = cv2.CascadeClassifier(
+        cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
+        face = face_classifier.detectMultiScale(
+        gray_image, scaleFactor=1.1, minNeighbors=5, minSize=(40, 40))
+        if len(face) < 1:
+            return image, " no one in camera"
+
+        for (x, y, w, h) in face:
+            cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 4)
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        if len(face) > 1:
+            return image, " other person in camera"
         if result.multi_face_landmarks:
             for face_landmarks in result.multi_face_landmarks:
                 for idx, lm in enumerate(face_landmarks.landmark):
                     if idx == 33 or idx == 263 or idx == 1 or idx == 61 or idx == 291 or idx == 199:
                         if idx == 1:
                             nose_2d = (lm.x *img_w, lm.y* img_h)
-                            nose_3d = (lm.x*img_w, lm.y*img_h, lm.z*3000)
+                           
                         x,y = int(lm.x *img_w), (lm.y*img_h)
                         
                         face_2d.append([x,y])
@@ -68,14 +83,6 @@ class Face_detector():
 
                 cv2.line(image, p1, p2, (255,0,0), 3)
 
-                gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-                face_classifier = cv2.CascadeClassifier(
-                cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
-                face = face_classifier.detectMultiScale(
-                gray_image, scaleFactor=1.1, minNeighbors=5, minSize=(40, 40))
-                for (x, y, w, h) in face:
-                    cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 4)
-                image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
                 if y < -10:
                     
                     text = "looking left"
@@ -88,8 +95,21 @@ class Face_detector():
                 elif x > 10:
                     
                     text = "looking up"
-                else: text = ""
-                return text, image
+                else: 
+                    img2 = cv2.imread("image_4240.jpg")
+                    pred = self.yolo_detect(img2)
+                    if pred == 0:
+                        text = " "
+                    elif pred == 1:
+                        text = "asleep"
+                    elif pred == 2:
+                        text = "sleep"
+                    else:
+                        text = "dont detect state"
+                return  image,text
+    def yolo_detect(self,image):
+        pred = self.yolo.run(image)
+        return pred
 # cap = cv2.VideoCapture(0)
 # while cap.isOpened():
 #     success, image = cap.read()

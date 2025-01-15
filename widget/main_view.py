@@ -34,7 +34,7 @@ class mainView(QMainWindow):
         self.thread.start()
 
 
-        self.detect_face = face_detection.Face_detector()
+        
         self.cap = cv2.VideoCapture(0)
 
         self.create_total_widget()
@@ -55,11 +55,10 @@ class mainView(QMainWindow):
         self.exit_bt.setText("Thoát")
         self.exit_bt.move(1200,900)
         self.scenePixmapItem = None
-    def processFrame(self, frame):
+    def processFrame(self, data):
         # Convert the frame to a format that Qt can use
         # frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        self.cameraWorker.running = False
-        text,frame = self.detect_face.face_detect(frame)
+        frame, text = data
         image = QImage(
             frame.data,
             frame.shape[1],
@@ -68,7 +67,8 @@ class mainView(QMainWindow):
         )
         pixmap = QPixmap.fromImage(image)
         self.image_lb.setPixmap(pixmap)
-        self.cameraWorker.running = True
+
+        self.message.setText(text+"\n"+self.message.toPlainText())
         # if self.scenePixmapItem is None:
         #     self.scenePixmapItem = QGraphicsPixmapItem(pixmap)
         #     self.scene.addItem(self.scenePixmapItem)

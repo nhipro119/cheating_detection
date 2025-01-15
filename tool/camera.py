@@ -3,7 +3,7 @@ from PyQt6.QtWidgets import QGraphicsView, QGraphicsScene, QGraphicsPixmapItem, 
 from PyQt6.QtGui import QImage, QPixmap
 import cv2
 import time
-
+from tool import face_detection
 class CameraWorker(QObject):
     frameCaptured = pyqtSignal(object)  # Emit frame data
 
@@ -11,6 +11,7 @@ class CameraWorker(QObject):
         super().__init__()
         self.camera_index = camera_index
         self.running = False
+        self.detect_face = face_detection.Face_detector()
 
     def run(self):
         self.running = True
@@ -18,7 +19,10 @@ class CameraWorker(QObject):
         while self.running:
             ret, frame = cap.read()
             if ret:
-                self.frameCaptured.emit(frame)
+
+                frame, text = self.detect_face.face_detect(frame)
+
+                self.frameCaptured.emit([frame, text])
                 # time.sleep(0.3)  # Limit to ~30 FPS
             else:
                 break

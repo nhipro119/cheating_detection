@@ -1,0 +1,8 @@
+path: ../data_VC # dataset root dir
+train: train/ # train images (relative to 'path') 39384 images
+val: val/ # val images (relative to 'path') 15062 images
+test: test/ # test images (optional) https://eval.ai/web/challenges/challenge-page/800/overview
+names:
+  0: normal
+  1: asleep
+  2: sleep
