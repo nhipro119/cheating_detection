@@ -29,9 +29,7 @@ class Face_detector():
 
         face_3d = []
         face_2d = []
-        if len(result.multi_face_landmarks) > 1:
-            return False
-        elif result.multi_face_landmarks:
+        if result.multi_face_landmarks:
             for face_landmarks in result.multi_face_landmarks:
                 for idx, lm in enumerate(face_landmarks.landmark):
                     if idx == 33 or idx == 263 or idx == 1 or idx == 61 or idx == 291 or idx == 199:

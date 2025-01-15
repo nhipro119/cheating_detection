@@ -16,6 +16,9 @@ if __name__ == "__main__":
     # app.setAttribute(Qt.ApplicationAttribute.AA_EnableHighDpiScaling, True)
     # app.setAttribute(Qt.ApplicationAttribute.AA_UseHighDpiPixmaps, True)
     window = main_view.mainView()
-    window.setWindowTitle('CT Scan');
+    window.setWindowTitle('CHEATING DETECTION');
     window.show()
+
     sys.exit(app.exec())
+    window.stopCamera()
+ 
