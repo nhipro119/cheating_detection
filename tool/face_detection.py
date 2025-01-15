@@ -62,7 +62,6 @@ class Face_detector():
                 x = angles[0] * 360
                 y = angles[1] * 360
                 z = angles[2] * 360
-                nose_3d_projection, jacobian = cv2.projectPoints(nose_3d, rot_vec, trans_vec, cam_matrix, dist_matrix)
 
                 p1 = (int(nose_2d[0]), int(nose_2d[1]))
                 p2 = (int(nose_2d[0] + y * 10), int(nose_2d[1] - x * 10))

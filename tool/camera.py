@@ -19,7 +19,7 @@ class CameraWorker(QObject):
             ret, frame = cap.read()
             if ret:
                 self.frameCaptured.emit(frame)
-                # time.sleep(0.033)  # Limit to ~30 FPS
+                # time.sleep(0.3)  # Limit to ~30 FPS
             else:
                 break
         cap.release()

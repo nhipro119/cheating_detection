@@ -58,6 +58,7 @@ class mainView(QMainWindow):
     def processFrame(self, frame):
         # Convert the frame to a format that Qt can use
         # frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        self.cameraWorker.running = False
         text,frame = self.detect_face.face_detect(frame)
         image = QImage(
             frame.data,
@@ -67,6 +68,7 @@ class mainView(QMainWindow):
         )
         pixmap = QPixmap.fromImage(image)
         self.image_lb.setPixmap(pixmap)
+        self.cameraWorker.running = True
         # if self.scenePixmapItem is None:
         #     self.scenePixmapItem = QGraphicsPixmapItem(pixmap)
         #     self.scene.addItem(self.scenePixmapItem)
