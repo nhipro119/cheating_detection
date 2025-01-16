@@ -3,7 +3,7 @@ import mediapipe as mp
 import numpy as np
 import time
 from yolov5.detect import yolo
-
+import os
 
 
 
@@ -15,6 +15,8 @@ class Face_detector():
         mp_drawing = mp.solutions.drawing_utils
         self.drawing_spec = mp_drawing.DrawingSpec(thickness=1, circle_radius=1)
         self.yolo = yolo(weights="yolov5/best.pt")
+
+
     def face_detect(self, image):
         image = cv2.cvtColor(cv2.flip(image,1), cv2.COLOR_BGR2RGB)
         img2 = image.copy()
@@ -37,13 +39,13 @@ class Face_detector():
         face = face_classifier.detectMultiScale(
         gray_image, scaleFactor=1.1, minNeighbors=5, minSize=(40, 40))
         if len(face) < 1:
-            return image, " no one in camera"
+            return image, 1
 
         for (x, y, w, h) in face:
             cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 4)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         if len(face) > 1:
-            return image, " other person in camera"
+            return image, 2
         if result.multi_face_landmarks:
             for face_landmarks in result.multi_face_landmarks:
                 for idx, lm in enumerate(face_landmarks.landmark):
@@ -83,30 +85,21 @@ class Face_detector():
 
                 cv2.line(image, p1, p2, (255,0,0), 3)
 
-                if y < -10:
-                    
-                    text = "looking left"
-                elif y>10:
-                    
-                    text = "looking right"
-                elif x < -10:
-                    
-                    text = "looking down"
-                elif x > 10:
-                    
-                    text = "looking up"
+                if y < -10 or y>10 or x < -10 or x > 10:
+                    state = 3
                 else: 
                     img2 = cv2.imread("image_4240.jpg")
                     pred = self.yolo_detect(img2)
                     if pred == 0:
-                        text = " "
+                        state =0
                     elif pred == 1:
-                        text = "asleep"
+                        state = 4
                     elif pred == 2:
-                        text = "sleep"
+                        state = 5
                     else:
                         text = "dont detect state"
-                return  image,text
+                image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+                return  image,state
     def yolo_detect(self,image):
         pred = self.yolo.run(image)
         return pred

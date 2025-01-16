@@ -37,15 +37,15 @@ from pathlib import Path
 
 import torch
 import pathlib
-temp = pathlib.PosixPath
-pathlib.PosixPath = pathlib.WindowsPath
+# temp = pathlib.PosixPath
+# pathlib.PosixPath = pathlib.WindowsPath
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[0]  # YOLOv5 root directory
 if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))  # add ROOT to PATH
 ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
 
-from ultralytics.utils.plotting import Annotator, colors, save_one_box
+# from ultralytics.utils.plotting import Annotator, colors, save_one_box
 
 from models.common import DetectMultiBackend
 from utils.dataloaders import IMG_FORMATS, VID_FORMATS, LoadImages, LoadScreenshots, LoadStreams
@@ -77,7 +77,7 @@ def run(
     conf_thres=0.25,  # confidence threshold
     iou_thres=0.45,  # NMS IOU threshold
     max_det=1000,  # maximum detections per image
-    device="",  # cuda device, i.e. 0 or 0,1,2,3 or cpu
+    device="cpu",  # cuda device, i.e. 0 or 0,1,2,3 or cpu
     view_img=False,  # show results
     save_txt=False,  # save results to *.txt
     save_format=0,  # save boxes coordinates in YOLO format or Pascal-VOC format (0 for YOLO and 1 for Pascal-VOC)
@@ -507,11 +507,11 @@ class yolo:
                 print(im.shape)
                 pred = self.model(im)
             pred = non_max_suppression(pred, self.conf_thres, self.iou, self.classes, self.agnotic_nms, max_det=self.max_det)
+            print(pred.shape)
+            # pred = np.asarray(pred)
             print(pred)
-            pred = np.asarray(pred)
-            print(pred)
-            return pred[0,0,5]
+            return 0
 
-a = yolo(weights="D:\\cheating_detection\\yolov5\\best.pt")
-img = cv2.imread("name1.jpg")
-a.run(img)
+# a = yolo(weights="D:\\cheating_detection\\yolov5\\best.pt")
+# img = cv2.imread("name1.jpg")
+# a.run(img)

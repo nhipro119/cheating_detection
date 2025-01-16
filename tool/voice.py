@@ -17,13 +17,13 @@ from threading import Thread
 
 import pvcobra
 from pvrecorder import PvRecorder
+from PyQt6.QtCore import QObject, QThread, pyqtSignal, Qt, QTimer
 
-
-class CobraDemo(Thread):
+class CobraDemo(QObject):
     """
     Microphone Demo for Cobra voice activity detection engine.
     """
-
+    voiceCapture = pyqtSignal(object)
     def __init__(
             self,
             library_path,
@@ -40,7 +40,7 @@ class CobraDemo(Thread):
         the default audio input device is used.
         """
 
-        super(CobraDemo, self).__init__()
+        super().__init__()
 
         self._library_path = library_path
         self._access_key = access_key
@@ -98,9 +98,11 @@ class CobraDemo(Thread):
                 percentage = voice_probability * 100
                 bar_length = int((percentage / 10) * 3)
                 empty_length = 30 - bar_length
-                sys.stdout.write("\r[%3d]|%s%s|" % (
-                    percentage, '█' * bar_length, ' ' * empty_length))
-                sys.stdout.flush()
+                if percentage >2:
+                    self.voiceCapture.emit(1)
+                else:
+                    self.voiceCapture.emit(0)
+                # sys.stdout.flush()
 
         except KeyboardInterrupt:
             print('Stopping ...')
@@ -114,43 +116,20 @@ class CobraDemo(Thread):
             if recorder is not None:
                 recorder.delete()
 
-    @classmethod
-    def show_available_devices(cls):
-        devices = PvRecorder.get_available_devices()
-        for i in range(len(devices)):
-            print('index: %d, device name: %s' % (i, devices[i]))
+    # @classmethod
+    # def show_available_devices(cls):
+    #     devices = PvRecorder.get_available_devices()
+    #     for i in range(len(devices)):
+    #         print('index: %d, device name: %s' % (i, devices[i]))
 
 
 def main():
-    parser = argparse.ArgumentParser()
 
-    parser.add_argument(
-        '--access_key',
-        help='AccessKey provided by Picovoice Console (https://console.picovoice.ai/)')
-
-    parser.add_argument(
-        '--library_path',
-        help='Absolute path to dynamic library. Default: using the library provided by `pvcobra`')
-
-    parser.add_argument('--audio_device_index', help='Index of input audio device.', type=int, default=-1)
-
-    parser.add_argument('--output_path', help='Absolute path to recorded audio for debugging.', default=None)
-
-    parser.add_argument('--show_audio_devices', action='store_true')
-
-    args = parser.parse_args()
-
-    if args.show_audio_devices:
-        CobraDemo.show_available_devices()
-    else:
-        if args.access_key is None:
-            print("Missing AccessKey (--access_key)")
-        else:
-            CobraDemo(
-                library_path=args.library_path,
-                access_key=args.access_key,
-                output_path=args.output_path,
-                input_device_index=args.audio_device_index).run()
+    CobraDemo(
+        library_path=None,
+        access_key="4H7XExZ76UQe2E4SFAM7vsItIZgSLrbmvA2A0psSaM/eLi9mvIPGgQ==",
+        output_path=None,
+        input_device_index=-1).run()
 
 
 if __name__ == '__main__':

@@ -4,6 +4,7 @@ from PyQt6.QtGui import QImage, QPixmap
 import cv2
 import time
 from tool import face_detection
+import os
 class CameraWorker(QObject):
     frameCaptured = pyqtSignal(object)  # Emit frame data
 
@@ -14,10 +15,22 @@ class CameraWorker(QObject):
         self.detect_face = face_detection.Face_detector()
 
     def run(self):
+
         self.running = True
-        cap = cv2.VideoCapture(self.camera_index)
+        cap = cv2.VideoCapture(0) 
+        # ret, frame = cap.read()
+        # i = 1
+        # while not ret:
+        #     cap.release()
+        #     cap = cv2.VideoCapture(vid_indices[i])
+        #     ret, frame = cap.read()
+        #     if not ret:
+        #         if i == len(vid_indices) - 1:
+        #             return None
+        #     i +=1
         while self.running:
             ret, frame = cap.read()
+            print(ret)
             if ret:
 
                 frame, text = self.detect_face.face_detect(frame)

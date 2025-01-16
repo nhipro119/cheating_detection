@@ -11,11 +11,12 @@ from PyQt6.QtWidgets import (
     QFileDialog,QMessageBox,
     QTextEdit, QGraphicsPixmapItem
 )
-from tool import face_detection,camera
+from tool import face_detection,camera,voice
 from PyQt6.QtGui import QPixmap, QImage, QIcon
 from PyQt6.QtCore import QSize, Qt, QThread
 import cv2
-
+import sys
+import time
 class mainView(QMainWindow):
     def __init__(self):
         super().__init__(parent=None)
@@ -32,7 +33,18 @@ class mainView(QMainWindow):
         self.cameraWorker.frameCaptured.connect(self.processFrame)
         self.thread.started.connect(self.cameraWorker.run)
         self.thread.start()
+        self.camera_state = 0
 
+        self.thread2 = QThread()
+        self.voice = voice.CobraDemo(library_path=None,
+        access_key="4H7XExZ76UQe2E4SFAM7vsItIZgSLrbmvA2A0psSaM/eLi9mvIPGgQ==",
+        output_path=None,
+        input_device_index=-1)
+        self.voice.moveToThread(self.thread2)
+        self.voice.voiceCapture.connect(self.process_voice)
+        self.thread2.started.connect(self.voice.run)
+        self.thread2.start()
+        self.voice_state = 0
 
         
         self.cap = cv2.VideoCapture(0)
@@ -42,23 +54,67 @@ class mainView(QMainWindow):
     def create_total_widget(self):
         name_lb = QLabel(parent=self.total_widget)
         name_lb.move(20,20)
+        name_lb.setStyleSheet("font-size: 96px;")
         name_lb.setText("HỆ THỐNG HỖ TRỢ CẢNH BÁO VI PHẠM")
         
         
         self.image_lb = QLabel(parent=self.total_widget)
         self.image_lb.setGeometry(200,200,900,900)
+        name_lb = QLabel(parent=self.total_widget)
+        name_lb.move(1200,200)
+        name_lb.setStyleSheet("font-size: 60px;")
+        name_lb.setText("CẢNH BÁO VI PHẠM")
         
         self.message = QTextEdit(parent=self.total_widget)
-        self.message.setGeometry(1200,200,500,500)
-
+        self.message.setGeometry(1200,300,500,500)
+        self.message.setStyleSheet("font-size: 30px; color: red;")
+        
         self.exit_bt = QPushButton(parent=self.total_widget)
         self.exit_bt.setText("Thoát")
         self.exit_bt.move(1200,900)
-        self.scenePixmapItem = None
+        self.exit_bt.clicked.connect(self.thoat)
+        
+    
+    def thoat(self):
+
+        self.cameraWorker.stop()
+        self.thread.quit()
+        self.thread.wait()
+        
+        self.thread2.quit()
+        self.thread2.wait()
+        
+        sys.exit()
+    
+    def process_voice(self, state):
+        if self.voice_state != state:
+            if state == 1:
+                t = time.localtime()
+                current_time = time.strftime("%H:%M:%S", t)
+                self.message.setText(current_time+": co am thanh gan do\n"+self.message.toPlainText())
+            self.voice_state = state
+            
     def processFrame(self, data):
         # Convert the frame to a format that Qt can use
         # frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        frame, text = data
+        frame, state = data
+        t = time.localtime()
+        current_time = time.strftime("%H:%M:%S", t)
+        if state != self.camera_state:
+            if state == 1:
+                text = current_time+": khong co ai trong camera"
+            elif state == 2:
+                text = current_time+": co nguoi khac trong camera"
+            elif state == 3:
+                text = current_time+": dang nhin sang huong khac"
+            elif state == 4:
+                text = current_time+": dang buon ngu"
+            elif state == 5:
+                text = current_time+": dang ngu"
+            else:
+                text = ""
+            self.message.setText(text+"\n"+self.message.toPlainText())
+            self.camera_state = state
         image = QImage(
             frame.data,
             frame.shape[1],
@@ -68,7 +124,7 @@ class mainView(QMainWindow):
         pixmap = QPixmap.fromImage(image)
         self.image_lb.setPixmap(pixmap)
 
-        self.message.setText(text+"\n"+self.message.toPlainText())
+        
         # if self.scenePixmapItem is None:
         #     self.scenePixmapItem = QGraphicsPixmapItem(pixmap)
         #     self.scene.addItem(self.scenePixmapItem)
