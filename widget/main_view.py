@@ -27,6 +27,7 @@ class mainView(QMainWindow):
         self.total_widget = QWidget()
         self.setCentralWidget(self.total_widget)
         
+        
         self.thread = QThread()
         self.cameraWorker = camera.CameraWorker()
         self.cameraWorker.moveToThread(self.thread)
@@ -59,7 +60,7 @@ class mainView(QMainWindow):
         
         
         self.image_lb = QLabel(parent=self.total_widget)
-        self.image_lb.setGeometry(200,200,900,900)
+        self.image_lb.setGeometry(200,200,800,800)
         name_lb = QLabel(parent=self.total_widget)
         name_lb.move(1200,200)
         name_lb.setStyleSheet("font-size: 60px;")
@@ -91,7 +92,7 @@ class mainView(QMainWindow):
             if state == 1:
                 t = time.localtime()
                 current_time = time.strftime("%H:%M:%S", t)
-                self.message.setText(current_time+": co am thanh gan do\n"+self.message.toPlainText())
+                self.message.setText(current_time+": Có âm thanh gần đó\n"+self.message.toPlainText())
             self.voice_state = state
             
     def processFrame(self, data):
@@ -102,17 +103,17 @@ class mainView(QMainWindow):
         current_time = time.strftime("%H:%M:%S", t)
         if state != self.camera_state:
             if state == 1:
-                text = current_time+": khong co ai trong camera"
+                text = current_time+": Không có ai trong camera"
             elif state == 2:
-                text = current_time+": co nguoi khac trong camera"
+                text = current_time+": Có người khác trong camera"
             elif state == 3:
-                text = current_time+": dang nhin sang huong khac"
+                text = current_time+": Đang nhìn sang hướng khác"
             elif state == 4:
-                text = current_time+": dang buon ngu"
+                text = current_time+": Đang buồn ngủ"
             elif state == 5:
-                text = current_time+": dang ngu"
+                text = current_time+": Đang ngủ"
             else:
-                text = ""
+                text = "Đang tập trung"
             self.message.setText(text+"\n"+self.message.toPlainText())
             self.camera_state = state
         image = QImage(

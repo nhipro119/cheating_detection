@@ -30,13 +30,13 @@ class CameraWorker(QObject):
         #     i +=1
         while self.running:
             ret, frame = cap.read()
-            print(ret)
+            
             if ret:
 
                 frame, text = self.detect_face.face_detect(frame)
 
                 self.frameCaptured.emit([frame, text])
-                # time.sleep(0.3)  # Limit to ~30 FPS
+                time.sleep(0.1)  # Limit to ~30 FPS
             else:
                 break
         cap.release()

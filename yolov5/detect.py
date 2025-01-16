@@ -37,8 +37,8 @@ from pathlib import Path
 
 import torch
 import pathlib
-# temp = pathlib.PosixPath
-# pathlib.PosixPath = pathlib.WindowsPath
+temp = pathlib.PosixPath
+pathlib.PosixPath = pathlib.WindowsPath
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[0]  # YOLOv5 root directory
 if str(ROOT) not in sys.path:
@@ -507,11 +507,16 @@ class yolo:
                 print(im.shape)
                 pred = self.model(im)
             pred = non_max_suppression(pred, self.conf_thres, self.iou, self.classes, self.agnotic_nms, max_det=self.max_det)
-            print(pred.shape)
-            # pred = np.asarray(pred)
-            print(pred)
-            return 0
 
+            # 
+            if len(pred) > 0:
+                print(pred)
+                pred = np.asarray(pred[0])
+                if len(pred) == 0:
+                    return 0
+                print(pred)
+                return pred[0,5]
+            return 0
 # a = yolo(weights="D:\\cheating_detection\\yolov5\\best.pt")
 # img = cv2.imread("name1.jpg")
 # a.run(img)

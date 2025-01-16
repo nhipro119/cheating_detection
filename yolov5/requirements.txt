@@ -40,6 +40,11 @@ seaborn>=0.11.0
 
 # Deploy ----------------------------------------------------------------------
 setuptools>=70.0.0 # Snyk vulnerability fix
+pyqt6
+pvcobra
+pvrecorder
+pathlib
+mediapipe
 # tritonclient[all]~=2.24.0
 
 # Extras ----------------------------------------------------------------------
