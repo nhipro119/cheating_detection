@@ -66,10 +66,16 @@ class mainView(QMainWindow):
         name_lb.setStyleSheet("font-size: 60px;")
         name_lb.setText("CẢNH BÁO VI PHẠM")
         
-        self.message = QTextEdit(parent=self.total_widget)
-        self.message.setGeometry(1200,300,500,500)
-        self.message.setStyleSheet("font-size: 30px; color: red;")
-        
+
+        self.labels = []
+        text = ["Đang tập trung","Không có ai trong camera","Có người khác trong camera","Đang nhìn sang hướng khác", "Đang buồn ngủ"," Đang ngủ","Có âm thanh gần đó"]
+        for i in range(7):
+            temp = QLabel(parent=self.total_widget)
+            temp.move(1200,250+(i+1)*50)
+            temp.setStyleSheet("font-size: 30px; color: blue;")
+            temp.setText(text[i])
+            temp.setDisabled(True)
+            self.labels.append(temp)
         self.exit_bt = QPushButton(parent=self.total_widget)
         self.exit_bt.setText("Thoát")
         self.exit_bt.move(1200,900)
@@ -90,9 +96,9 @@ class mainView(QMainWindow):
     def process_voice(self, state):
         if self.voice_state != state:
             if state == 1:
-                t = time.localtime()
-                current_time = time.strftime("%H:%M:%S", t)
-                self.message.setText(current_time+": Có âm thanh gần đó\n"+self.message.toPlainText())
+                self.labels[6].setStyleSheet("font-size: 30px; color: red;")
+            else:
+                self.labels[6].setStyleSheet("font-size: 30px; color: blue;")
             self.voice_state = state
             
     def processFrame(self, data):
@@ -102,19 +108,22 @@ class mainView(QMainWindow):
         t = time.localtime()
         current_time = time.strftime("%H:%M:%S", t)
         if state != self.camera_state:
-            if state == 1:
-                text = current_time+": Không có ai trong camera"
-            elif state == 2:
-                text = current_time+": Có người khác trong camera"
-            elif state == 3:
-                text = current_time+": Đang nhìn sang hướng khác"
-            elif state == 4:
-                text = current_time+": Đang buồn ngủ"
-            elif state == 5:
-                text = current_time+": Đang ngủ"
-            else:
-                text = "Đang tập trung"
-            self.message.setText(text+"\n"+self.message.toPlainText())
+            for i in self.labels:
+                i.setStyleSheet("font-size: 30px; color: blue;")
+            self.labels[state].setStyleSheet("font-size: 30px; color: red;")
+            # if state == 1:
+            #     text = current_time+": Không có ai trong camera"
+            # elif state == 2:
+            #     text = current_time+": Có người khác trong camera"
+            # elif state == 3:
+            #     text = current_time+": Đang nhìn sang hướng khác"
+            # elif state == 4:
+            #     text = current_time+": Đang buồn ngủ"
+            # elif state == 5:
+            #     text = current_time+": Đang ngủ"
+            # else:
+            #     text = "Đang tập trung"
+            # self.message.setText(text+"\n"+self.message.toPlainText())
             self.camera_state = state
         image = QImage(
             frame.data,
