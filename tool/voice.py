@@ -98,7 +98,7 @@ class CobraDemo(QObject):
                 percentage = voice_probability * 100
                 bar_length = int((percentage / 10) * 3)
                 empty_length = 30 - bar_length
-                if percentage >30:
+                if percentage >25:
                     self.voiceCapture.emit(1)
                 else:
                     self.voiceCapture.emit(0)

@@ -504,7 +504,7 @@ class yolo:
                         pred = torch.cat((pred, self.model(image).unsqueeze(0)), dim=0)
                 pred = [pred, None]
             else:
-                print(im.shape)
+                # print(im.shape)
                 pred = self.model(im)
             pred = non_max_suppression(pred, self.conf_thres, self.iou, self.classes, self.agnotic_nms, max_det=self.max_det)
 

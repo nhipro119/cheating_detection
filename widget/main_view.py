@@ -68,7 +68,7 @@ class mainView(QMainWindow):
         
 
         self.labels = []
-        text = ["Đang tập trung","Không có ai trong camera","Có người khác trong camera","Đang nhìn sang hướng khác", "Đang buồn ngủ"," Đang ngủ","Có âm thanh gần đó"]
+        text = ["Đang tập trung","Không có ai trong camera","Có người khác trong camera","Đang nhìn sang hướng khác", "Đang buồn ngủ","Đang ngủ","Có tiếng nói gần đó"]
         for i in range(7):
             temp = QLabel(parent=self.total_widget)
             temp.move(1200,250+(i+1)*50)
@@ -94,7 +94,9 @@ class mainView(QMainWindow):
         sys.exit()
     
     def process_voice(self, state):
+        print(state)
         if self.voice_state != state:
+            
             if state == 1:
                 self.labels[6].setStyleSheet("font-size: 30px; color: red;")
             else:
