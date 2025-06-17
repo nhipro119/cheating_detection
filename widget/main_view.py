@@ -13,7 +13,7 @@ from PyQt6.QtWidgets import (
 )
 from tool import face_detection,camera,voice
 from PyQt6.QtGui import QPixmap, QImage, QIcon
-from PyQt6.QtCore import QSize, Qt, QThread
+from PyQt6.QtCore import QSize, Qt, QThread, QTimer, QTime
 import cv2
 import sys
 import time
@@ -25,6 +25,7 @@ class mainView(QMainWindow):
         self.setMinimumSize(*size)
         
         self.total_widget = QWidget()
+        self.total_widget.setStyleSheet("background-color:#2b2b2b;")
         self.setCentralWidget(self.total_widget)
         
         
@@ -51,35 +52,63 @@ class mainView(QMainWindow):
         self.cap = cv2.VideoCapture(0)
 
         self.create_total_widget()
+
+        #create a time countdown
+        self.remaining_minutes = 25
+        self.learning_time = 1
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.time_countdown)
+        self.timer.start(60000)
         self.run()
+    
+
     def create_total_widget(self):
         name_lb = QLabel(parent=self.total_widget)
         name_lb.move(20,20)
-        name_lb.setStyleSheet("font-size: 96px;")
-        name_lb.setText("HỆ THỐNG HỖ TRỢ CẢNH BÁO VI PHẠM")
+        name_lb.setStyleSheet("font-size: 96px; color:white;")
+        name_lb.setText("Hệ thống hỗ trợ tập trung học tập")
         
         
         self.image_lb = QLabel(parent=self.total_widget)
         self.image_lb.setGeometry(200,200,800,800)
-        name_lb = QLabel(parent=self.total_widget)
-        name_lb.move(1200,200)
-        name_lb.setStyleSheet("font-size: 60px;")
-        name_lb.setText("CẢNH BÁO VI PHẠM")
-        
+        right_panel = QVBoxLayout()
+
+
+        self.pomodoro_label = QLabel("Chu kỳ Pomodoro: Giờ học")
+        self.pomodoro_label.setStyleSheet("color: white; font-size: 50px;")
+        right_panel.addWidget(self.pomodoro_label)
+
+        self.time_label = QLabel("25 Phút")
+        self.time_label.setStyleSheet("color: white; font-size: 80px; font-weight: bold;")
+        self.time_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        right_panel.addWidget(self.time_label)
+
+        self.warning_label = QLabel("Cảnh báo:")
+        self.warning_label.setStyleSheet("color: white; font-size: 60px;")
+        right_panel.addWidget(self.warning_label)
 
         self.labels = []
-        text = ["Đang tập trung","Không có ai trong camera","Có người khác trong camera","Đang nhìn sang hướng khác", "Đang buồn ngủ","Đang ngủ","Có tiếng nói gần đó"]
-        for i in range(7):
-            temp = QLabel(parent=self.total_widget)
-            temp.move(1200,250+(i+1)*50)
-            temp.setStyleSheet("font-size: 30px; color: blue;")
+        text = ["Đang tập trung","Có tiếng nói gần đó"]
+        for i in range(2):
+            temp = QLabel()
+            temp.move(1200,450+(i+1)*50)
+            temp.setStyleSheet("font-size: 60px; color: blue;")
             temp.setText(text[i])
             temp.setDisabled(True)
+            right_panel.addWidget(temp)
             self.labels.append(temp)
-        self.exit_bt = QPushButton(parent=self.total_widget)
-        self.exit_bt.setText("Thoát")
-        self.exit_bt.move(1200,900)
-        self.exit_bt.clicked.connect(self.thoat)
+        right_panel.addStretch()
+        right_widget = QWidget(parent=self.total_widget)
+        right_widget.setLayout(right_panel)
+        right_widget.setStyleSheet("background-color: #3c3f41; padding: 20px;")
+        right_widget.setGeometry(1100,200,700,700)
+        self.exit_button = QPushButton("Thoát",parent=self.total_widget)
+        self.exit_button.setStyleSheet("background-color: red; color: white; font-size: 40px; padding: 6px;")
+        self.exit_button.clicked.connect(self.close)
+        self.exit_button.move(1700,900)
+        self.exit_button.clicked.connect(self.thoat)
+
+        
         
     
     def thoat(self):
@@ -98,9 +127,9 @@ class mainView(QMainWindow):
         if self.voice_state != state:
             
             if state == 1:
-                self.labels[6].setStyleSheet("font-size: 30px; color: red;")
+                self.labels[1].setStyleSheet("font-size: 30px; color: red;")
             else:
-                self.labels[6].setStyleSheet("font-size: 30px; color: blue;")
+                self.labels[1].setStyleSheet("font-size: 30px; color: blue;")
             self.voice_state = state
             
     def processFrame(self, data):
@@ -111,8 +140,9 @@ class mainView(QMainWindow):
         current_time = time.strftime("%H:%M:%S", t)
         if state != self.camera_state:
             for i in self.labels:
-                i.setStyleSheet("font-size: 30px; color: blue;")
-            self.labels[state].setStyleSheet("font-size: 30px; color: red;")
+                i.setStyleSheet("font-size: 60px; color: blue;")
+            if state != 0:
+                self.labels[0].setStyleSheet("font-size: 60px; color: red;")
             # if state == 1:
             #     text = current_time+": Không có ai trong camera"
             # elif state == 2:
@@ -157,8 +187,20 @@ class mainView(QMainWindow):
         #     bytes_per_line = ch * w
         #     convert_to_Qt_format = QImage(image.data, 900, 900, bytes_per_line, QImage.Format.Format_RGB888)
         #     self.image_lb.setPixmap(QPixmap.fromImage(convert_to_Qt_format))
+    def time_countdown(self):
+        self.remaining_minutes -= 1
+        if self.remaining_minutes == 0:
+            self.learning_time *= -1
+            if self.learning_time == 1:
 
-        
+                self.remaining_minutes = 25
+                self.pomodoro_label.setText("Chu kỳ Pomodoro: Giờ học")
+                
+            else:
+                self.pomodoro_label.setText("Chu kỳ Pomodoro: Giờ nghỉ")
+                self.remaining_minutes = 5
+        self.time_label.setText(f"{self.remaining_minutes} Phút")
+    
 
         
         
