@@ -13,7 +13,8 @@ from PyQt6.QtWidgets import (
 )
 from tool import face_detection,camera,voice
 from PyQt6.QtGui import QPixmap, QImage, QIcon
-from PyQt6.QtCore import QSize, Qt, QThread, QTimer, QTime
+from PyQt6.QtCore import QSize, Qt, QThread, QTimer, QTime, QUrl
+from PyQt6.QtMultimedia import QSoundEffect
 import cv2
 import sys
 import time
@@ -60,8 +61,16 @@ class mainView(QMainWindow):
         self.timer.timeout.connect(self.time_countdown)
         self.timer.start(60000)
         self.run()
-    
 
+        self.sound = QSoundEffect()
+        self.sound.setSource(QUrl.fromLocalFile("warning.wav"))  # Đảm bảo file .wav có sẵn
+        self.sound.setVolume(1.0)  # Âm lượng từ 0.0 đến 1.0
+        self.warning_sound = 0
+        self.sound_timer = QTimer()
+        self.sound_timer.timeout.connect(self.check_sound_state)
+        self.sound_timer.start(2000)
+        
+        self.sound.play()
     def create_total_widget(self):
         name_lb = QLabel(parent=self.total_widget)
         name_lb.move(20,20)
@@ -123,13 +132,15 @@ class mainView(QMainWindow):
         sys.exit()
     
     def process_voice(self, state):
-        print(state)
+        # print(state)
         if self.voice_state != state:
             
             if state == 1:
                 self.labels[1].setStyleSheet("font-size: 30px; color: red;")
+                self.warning_sound = 1
             else:
                 self.labels[1].setStyleSheet("font-size: 30px; color: blue;")
+                self.warning_sound = 0
             self.voice_state = state
             
     def processFrame(self, data):
@@ -141,8 +152,10 @@ class mainView(QMainWindow):
         if state != self.camera_state:
             for i in self.labels:
                 i.setStyleSheet("font-size: 60px; color: blue;")
+                self.warning_sound = 0
             if state != 0:
                 self.labels[0].setStyleSheet("font-size: 60px; color: red;")
+                self.warning_sound = 1
             # if state == 1:
             #     text = current_time+": Không có ai trong camera"
             # elif state == 2:
@@ -200,7 +213,9 @@ class mainView(QMainWindow):
                 self.pomodoro_label.setText("Chu kỳ Pomodoro: Giờ nghỉ")
                 self.remaining_minutes = 5
         self.time_label.setText(f"{self.remaining_minutes} Phút")
-    
+    def check_sound_state(self):
+        if self.warning_sound == 1:
+            self.sound.play()
 
         
         
