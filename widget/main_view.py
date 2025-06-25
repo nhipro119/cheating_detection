@@ -84,24 +84,23 @@ class mainView(QMainWindow):
 
 
         self.pomodoro_label = QLabel("Chu kỳ Pomodoro: Giờ học")
-        self.pomodoro_label.setStyleSheet("color: white; font-size: 50px;")
+        self.pomodoro_label.setStyleSheet("color: white; font-size: 20px;")
         right_panel.addWidget(self.pomodoro_label)
 
         self.time_label = QLabel("25 Phút")
-        self.time_label.setStyleSheet("color: white; font-size: 80px; font-weight: bold;")
+        self.time_label.setStyleSheet("color: white; font-size: 50px; font-weight: bold;")
         self.time_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         right_panel.addWidget(self.time_label)
 
         self.warning_label = QLabel("Cảnh báo:")
-        self.warning_label.setStyleSheet("color: white; font-size: 60px;")
+        self.warning_label.setStyleSheet("color: white; font-size: 30px;")
         right_panel.addWidget(self.warning_label)
 
         self.labels = []
-        text = ["Đang tập trung","Có tiếng nói gần đó"]
-        for i in range(2):
+        text =  ["Đang tập trung","Không có ai trong camera","Có người khác trong camera","Đang nhìn sang hướng khác", "Đang buồn ngủ"," Đang ngủ","Có âm thanh gần đó"]
+        for i in range(len(text)):
             temp = QLabel()
-            temp.move(1200,450+(i+1)*50)
-            temp.setStyleSheet("font-size: 60px; color: blue;")
+            temp.setStyleSheet("font-size: 30px; color: blue;")
             temp.setText(text[i])
             temp.setDisabled(True)
             right_panel.addWidget(temp)
@@ -109,7 +108,7 @@ class mainView(QMainWindow):
         right_panel.addStretch()
         right_widget = QWidget(parent=self.total_widget)
         right_widget.setLayout(right_panel)
-        right_widget.setStyleSheet("background-color: #3c3f41; padding: 20px;")
+        right_widget.setStyleSheet("background-color: #3c3f41; padding: 10px;")
         right_widget.setGeometry(1100,200,700,700)
         self.exit_button = QPushButton("Thoát",parent=self.total_widget)
         self.exit_button.setStyleSheet("background-color: red; color: white; font-size: 40px; padding: 6px;")
@@ -139,7 +138,7 @@ class mainView(QMainWindow):
                 self.labels[1].setStyleSheet("font-size: 30px; color: red;")
                 self.warning_sound = 1
             else:
-                self.labels[1].setStyleSheet("font-size: 30px; color: blue;")
+                self.labels[-1].setStyleSheet("font-size: 30px; color: blue;")
                 self.warning_sound = 0
             self.voice_state = state
             
@@ -151,11 +150,35 @@ class mainView(QMainWindow):
         current_time = time.strftime("%H:%M:%S", t)
         if state != self.camera_state:
             for i in self.labels:
-                i.setStyleSheet("font-size: 60px; color: blue;")
-                self.warning_sound = 0
+                i.setStyleSheet("font-size: 30px; color: blue;")
+            self.labels[state].setStyleSheet("font-size: 30px; color: red;")
+            # if state == 1:
+            #     text = current_time+": Không có ai trong camera"
+            # elif state == 2:
+            #     text = current_time+": Có người khác trong camera"
+            # elif state == 3:
+            #     text = current_time+": Đang nhìn sang hướng khác"
+            # elif state == 4:
+            #     text = current_time+": Đang buồn ngủ"
+            # elif state == 5:
+            #     text = current_time+": Đang ngủ"
+            # else:
+            #     text = "Đang tập trung"
+            # self.message.setText(text+"\n"+self.message.toPlainText())
             if state != 0:
-                self.labels[0].setStyleSheet("font-size: 60px; color: red;")
                 self.warning_sound = 1
+            else:
+                state = 0
+            self.camera_state = state
+            
+            
+        # if state != self.camera_state:
+        #     for i in self.labels:
+        #         i.setStyleSheet("font-size: 60px; color: blue;")
+        #         self.warning_sound = 0
+        #     if state != 0:
+        #         self.labels[0].setStyleSheet("font-size: 60px; color: red;")
+        #         self.warning_sound = 1
             # if state == 1:
             #     text = current_time+": Không có ai trong camera"
             # elif state == 2:
